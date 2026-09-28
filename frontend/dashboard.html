@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  Esta es la pantalla principal del usuario una vez logueado.
+  Acá mostramos métricas del mes y permitimos cambiar el día de cierre.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App | Gastos Personales</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="./imagenes/logo.jpg" >
+</head>
+<body>
+  <!-- Barra superior con botón de cierre de sesión -->
+  <header class="topbar">
+    <div class="contenedor topbar-contenido">
+      <h1>App | Gastos Personales v. 1.0</h1>
+      <button id="btn-logout" class="btn btn-secundario">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Navegación principal -->
+  <nav class="nav-principal">
+    <div class="contenedor nav-links">
+      <a class="activo" href="dashboard.html">Inicio</a>
+      <a href="gastos.html">Gastos</a>
+      <a href="ingresos.html">Ingresos</a>
+      <a href="tarjetas.html">Tarjetas</a>
+    </div>
+  </nav>
+
+  <main class="contenedor seccion">
+    <!-- Formulario para cambiar día de cierre -->
+    <section class="card">
+      <h2>Configuración de balance</h2>
+      <form id="form-dia-cierre" class="fila-formulario">
+        <label for="dia-cierre">Día de cierre (1 a 28)</label>
+        <input id="dia-cierre" type="number" min="1" max="28" required>
+        <button type="submit" class="btn btn-primario">Guardar</button>
+      </form>
+      <div id="mensaje-cierre" class="mensaje"></div>
+    </section>
+
+    <!-- Bloque de métricas -->
+    <section class="card">
+      <div class="encabezado-seccion">
+        <h2>Métricas mensuales</h2>
+        <input id="mes-consulta" type="month">
+      </div>
+
+      <div class="grid-metricas">
+        <article class="metric-card">
+          <h3>Total de gastos del mes</h3>
+          <p id="total-gastos">$ 0.00</p>
+        </article>
+        <article class="metric-card">
+          <h3>Total de ingresos del mes</h3>
+          <p id="total-ingresos">$ 0.00</p>
+        </article>
+        <article class="metric-card">
+          <h3>Economía del mes</h3>
+          <p id="economia">$ 0.00</p>
+        </article>
+        <article class="metric-card">
+          <h3>Balance por día de cierre</h3>
+          <p id="balance-cierre">$ 0.00</p>
+        </article>
+      </div>
+
+      <h3>Gastos por categoría</h3>
+      <ul id="lista-categorias" class="lista-simple"></ul>
+      <div id="mensaje-metricas" class="mensaje"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/metricas.js"></script>
+</body>
+</html>

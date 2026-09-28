@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+  Esta pantalla sirve para gestionar gastos (alta, edición, borrado y listado).
+  También permite asociar tarjeta cuando el método de pago es débito o crédito.
+ -->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastos | Gastos Personales</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="./imagenes/logo.jpg" >
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="contenedor topbar-contenido">
+      <h1>Gestión de gastos</h1>
+      <button id="btn-logout" class="btn btn-secundario">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Menú de navegación -->
+  <nav class="nav-principal">
+    <div class="contenedor nav-links">
+      <a href="dashboard.html">Inicio</a>
+      <a class="activo" href="gastos.html">Gastos</a>
+      <a href="ingresos.html">Ingresos</a>
+      <a href="tarjetas.html">Tarjetas</a>
+    </div>
+  </nav>
+
+  <main class="contenedor seccion">
+    <!-- Formulario de alta/edición -->
+    <section class="card">
+      <h2 id="titulo-form-gasto">Nuevo gasto</h2>
+      <form id="form-gasto" class="formulario-grid">
+        <input type="hidden" id="gasto-id">
+
+        <label>Descripción
+          <input id="gasto-descripcion" type="text" required>
+        </label>
+
+        <label>Monto
+          <input id="gasto-monto" type="number" step="0.01" min="0.01" required>
+        </label>
+
+        <label>Fecha
+          <input id="gasto-fecha" type="date" required>
+        </label>
+
+        <label>Categoría
+          <input id="gasto-categoria" type="text" required placeholder="Ej: Alimentos">
+        </label>
+
+        <label>Método de pago
+          <select id="gasto-metodo" required>
+            <option value="efectivo">Efectivo</option>
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+            <option value="billetera_virtual">Billetera virtual</option>
+          </select>
+        </label>
+
+        <label id="grupo-tarjeta">Tarjeta asociada
+          <select id="gasto-tarjeta">
+            <option value="">Seleccionar tarjeta</option>
+          </select>
+        </label>
+
+        <label>Cantidad de cuotas
+          <input id="gasto-cuotas" type="number" min="1" value="1" required>
+        </label>
+
+        <label>Valor de cuota
+          <input id="gasto-valor-cuota" type="number" min="0" step="0.01" value="0">
+        </label>
+
+        <label>Valor total
+          <input id="gasto-valor-total" type="number" min="0" step="0.01" value="0">
+        </label>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn btn-primario">Guardar gasto</button>
+          <button type="button" id="btn-cancelar-gasto" class="btn btn-secundario oculto">Cancelar edición</button>
+        </div>
+      </form>
+      <div id="mensaje-gasto" class="mensaje"></div>
+    </section>
+
+    <!-- Tabla de resultados -->
+    <section class="card">
+      <h2>Listado de gastos</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Método</th>
+              <th>Monto</th>
+              <th>Cuotas</th>
+              <th>Tarjeta</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-gastos"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/gastos.js"></script>
+</body>
+</html>

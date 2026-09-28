@@ -1,0 +1,6 @@
+backend/vendor
+backend/composer.phar
+backend/.env
+backend/.env.local
+backend/database.sql
+backend/.htaccess

@@ -1,0 +1,353 @@
+/*
+  Este archivo define los estilos generales de toda la app.
+*/
+
+/*
+   Variables de colores base
+*/
+:root {
+  --fondo: #f5f7fb;
+  --texto: #1f2937;
+  --primario: #2563eb;
+  --primario-oscuro: #1d4ed8;
+  --secundario: #6b7280;
+  --exito: #047857;
+  --error: #b91c1c;
+  --borde: #d1d5db;
+  --blanco: #ffffff;
+}
+
+/*
+   Reset y base de tipografía
+*/
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+/*
+   Layout general
+*/
+.contenedor {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+
+.seccion {
+  padding: 1.2rem 0 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(31, 41, 55, 0.06);
+}
+
+/*
+   Header y navegación
+*/
+.topbar {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
+}
+
+.topbar-contenido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.nav-principal {
+  background: #eef2ff;
+  border-bottom: 1px solid #c7d2fe;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--texto);
+  font-weight: 600;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+}
+
+.nav-links a.activo,
+.nav-links a:hover {
+  background: var(--primario);
+  color: var(--blanco);
+}
+
+/*
+   Pantalla de acceso
+*/
+.auth-contenedor {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(460px, 100%);
+}
+
+.subtitulo {
+  color: var(--secundario);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.btn-tab {
+  flex: 1;
+  border: 1px solid var(--borde);
+  background: #f3f4f6;
+  color: var(--texto);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-tab.activo {
+  background: var(--primario);
+  color: var(--blanco);
+  border-color: var(--primario);
+}
+
+.ayuda {
+  margin-top: 1rem;
+  color: var(--secundario);
+}
+
+/*
+   Formularios
+*/
+.formulario,
+.formulario-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.formulario-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  background: #fff;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+.fila-formulario {
+  display: flex;
+  gap: 0.6rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.acciones-formulario {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/*
+   Botones
+*/
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primario {
+  background: var(--primario);
+  color: var(--blanco);
+}
+
+.btn-primario:hover {
+  background: var(--primario-oscuro);
+}
+
+.btn-secundario {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-eliminar {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-accion {
+  margin-right: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+/*
+   Mensajes de estado
+*/
+.mensaje {
+  margin-top: 0.75rem;
+  min-height: 1.2rem;
+  font-weight: 600;
+}
+
+.mensaje.exito {
+  color: var(--exito);
+}
+
+.mensaje.error {
+  color: var(--error);
+}
+
+/*
+   Tablas
+*/
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  padding: 0.6rem;
+  vertical-align: top;
+}
+
+/*
+   Tarjetas de métricas
+*/
+.grid-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.8rem;
+  margin: 0.8rem 0 1rem;
+}
+
+.metric-card {
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.8rem;
+  background: #fafafa;
+}
+
+.metric-card p {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+/*
+   Listados de categorías y gastos
+*/
+.lista-simple {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.lista-simple li {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem;
+  background: #fcfcfc;
+}
+
+/*
+   Tarjetas visuales de la pantalla tarjetas
+*/
+.tarjetas-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.tarjeta-item {
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.8rem;
+  background: #fafafa;
+}
+
+.tarjeta-item h3 {
+  margin-bottom: 0.4rem;
+}
+
+/* Clase utilitaria para ocultar elementos */
+.oculto {
+  display: none;
+}
+
+/*
+   Responsive básico
+*/
+@media (max-width: 640px) {
+  .topbar-contenido {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+}

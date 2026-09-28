@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+  Esta es la pantalla de acceso principal de la app.
+  Permite loguearse o registrarse.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso | Gastos Personales</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="./imagenes/logo.jpg" >
+</head>
+<body>
+  <main class="contenedor auth-contenedor">
+    <section class="card auth-card">
+      <!-- Título y texto de bienvenida -->
+      <h1>Gastos Personales</h1>
+      <p class="subtitulo">Iniciá sesión o creá tu cuenta para gestionar tus finanzas.</p>
+
+      <!-- Pestañas para cambiar entre login y registro -->
+      <div class="auth-tabs" role="tablist" aria-label="Formularios de acceso">
+        <button id="tab-login" class="btn-tab activo" type="button">Iniciar sesión</button>
+        <button id="tab-registro" class="btn-tab" type="button">Registrarse</button>
+      </div>
+
+      <!-- Formulario de login -->
+      <form id="form-login" class="formulario auth-panel" data-panel="login">
+        <label for="login-email">Email</label>
+        <input id="login-email" name="email" type="email" required placeholder="tu@email.com">
+
+        <label for="login-password">Contraseña</label>
+        <input id="login-password" name="password" type="password" required minlength="6" placeholder="******">
+
+        <button type="submit" class="btn btn-primario">Ingresar</button>
+        <p class="ayuda">¿No tenés cuenta? <a href="#" id="ir-a-registro">Registrate</a>.</p>
+      </form>
+
+      <!-- Formulario de registro -->
+      <form id="form-registro" class="formulario auth-panel oculto" data-panel="registro">
+        <label for="registro-nombre">Nombre</label>
+        <input id="registro-nombre" name="nombre" type="text" required minlength="2" placeholder="Tu nombre">
+
+        <label for="registro-email">Email</label>
+        <input id="registro-email" name="email" type="email" required placeholder="tu@email.com">
+
+        <label for="registro-password">Contraseña</label>
+        <input id="registro-password" name="password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres">
+
+        <label for="registro-cierre">Día de cierre de balance (1 a 28)</label>
+        <input id="registro-cierre" name="dia_cierre_balance" type="number" min="1" max="28" value="1" required>
+
+        <button type="submit" class="btn btn-primario">Crear cuenta</button>
+        <p class="ayuda">¿Ya tenés cuenta? <a href="#" id="ir-a-login">Iniciá sesión</a>.</p>
+      </form>
+
+      <!-- Mensajes globales de error o éxito -->
+      <div id="mensaje-global" class="mensaje"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Este script se encarga del cambio visual entre pestañas.
+    document.addEventListener('DOMContentLoaded', function () {
+      var tabLogin = document.getElementById('tab-login');
+      var tabRegistro = document.getElementById('tab-registro');
+      var formLogin = document.getElementById('form-login');
+      var formRegistro = document.getElementById('form-registro');
+      var linkRegistro = document.getElementById('ir-a-registro');
+      var linkLogin = document.getElementById('ir-a-login');
+
+      function mostrarPanel(panel) {
+        var esLogin = panel === 'login';
+
+        if (esLogin) {
+          formLogin.classList.remove('oculto');
+          formRegistro.classList.add('oculto');
+          tabLogin.classList.add('activo');
+          tabRegistro.classList.remove('activo');
+        } else {
+          formLogin.classList.add('oculto');
+          formRegistro.classList.remove('oculto');
+          tabLogin.classList.remove('activo');
+          tabRegistro.classList.add('activo');
+        }
+      }
+
+      tabLogin.addEventListener('click', function () {
+        mostrarPanel('login');
+      });
+
+      tabRegistro.addEventListener('click', function () {
+        mostrarPanel('registro');
+      });
+
+      linkRegistro.addEventListener('click', function (evento) {
+        evento.preventDefault();
+        mostrarPanel('registro');
+      });
+
+      linkLogin.addEventListener('click', function (evento) {
+        evento.preventDefault();
+        mostrarPanel('login');
+      });
+    });
+  </script>
+</body>
+</html>

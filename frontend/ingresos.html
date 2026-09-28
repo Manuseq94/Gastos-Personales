@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--
+  Esta pantalla sirve para gestionar ingresos del usuario.
+  Incluye formulario de alta y edición y tabla para listar todo.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingresos | Gastos Personales</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="./imagenes/logo.jpg" >
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="contenedor topbar-contenido">
+      <h1>Gestión de ingresos</h1>
+      <button id="btn-logout" class="btn btn-secundario">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Navegación principal -->
+  <nav class="nav-principal">
+    <div class="contenedor nav-links">
+      <a href="dashboard.html">Inicio</a>
+      <a href="gastos.html">Gastos</a>
+      <a class="activo" href="ingresos.html">Ingresos</a>
+      <a href="tarjetas.html">Tarjetas</a>
+    </div>
+  </nav>
+
+  <main class="contenedor seccion">
+    <!-- Formulario de alta/edición -->
+    <section class="card">
+      <h2 id="titulo-form-ingreso">Nuevo ingreso</h2>
+      <form id="form-ingreso" class="formulario-grid">
+        <input type="hidden" id="ingreso-id">
+
+        <label>Descripción
+          <input id="ingreso-descripcion" type="text" required>
+        </label>
+
+        <label>Monto
+          <input id="ingreso-monto" type="number" step="0.01" min="0.01" required>
+        </label>
+
+        <label>Fecha
+          <input id="ingreso-fecha" type="date" required>
+        </label>
+
+        <label class="checkbox-label">
+          <input id="ingreso-es-fijo" type="checkbox">
+          Es ingreso fijo
+        </label>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn btn-primario">Guardar ingreso</button>
+          <button type="button" id="btn-cancelar-ingreso" class="btn btn-secundario oculto">Cancelar edición</button>
+        </div>
+      </form>
+      <div id="mensaje-ingreso" class="mensaje"></div>
+    </section>
+
+    <!-- Tabla de ingresos -->
+    <section class="card">
+      <h2>Listado de ingresos</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Monto</th>
+              <th>Fijo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-ingresos"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ingresos.js"></script>
+</body>
+</html>

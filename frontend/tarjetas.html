@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!--
+  Esta pantalla sirve para gestionar tarjetas del usuario.
+  Además muestra los gastos asociados.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarjetas | Gastos Personales</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="./imagenes/logo.jpg" >
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="contenedor topbar-contenido">
+      <h1>Gestión de tarjetas</h1>
+      <button id="btn-logout" class="btn btn-secundario">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Navegación principal -->
+  <nav class="nav-principal">
+    <div class="contenedor nav-links">
+      <a href="dashboard.html">Inicio</a>
+      <a href="gastos.html">Gastos</a>
+      <a href="ingresos.html">Ingresos</a>
+      <a class="activo" href="tarjetas.html">Tarjetas</a>
+    </div>
+  </nav>
+
+  <main class="contenedor seccion">
+    <!-- Formulario de alta y edición de tarjeta -->
+    <section class="card">
+      <h2 id="titulo-form-tarjeta">Nueva tarjeta</h2>
+      <form id="form-tarjeta" class="formulario-grid">
+        <input type="hidden" id="tarjeta-id">
+
+        <label>Nombre
+          <input id="tarjeta-nombre" type="text" required placeholder="Ej: Visa Sueldo">
+        </label>
+
+        <label>Tipo
+          <select id="tarjeta-tipo" required>
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+          </select>
+        </label>
+
+        <label>Banco
+          <input id="tarjeta-banco" type="text" required placeholder="Ej: Banco Nación">
+        </label>
+
+        <label>Últimos 4 dígitos
+          <input id="tarjeta-ultimos4" type="text" pattern="[0-9]{4}" maxlength="4" required placeholder="1234">
+        </label>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn btn-primario">Guardar tarjeta</button>
+          <button type="button" id="btn-cancelar-tarjeta" class="btn btn-secundario oculto">Cancelar edición</button>
+        </div>
+      </form>
+      <div id="mensaje-tarjeta" class="mensaje"></div>
+    </section>
+
+    <!-- Listado visual de tarjetas + gastos asociados -->
+    <section class="card">
+      <h2>Listado de tarjetas y gastos asociados</h2>
+      <div id="lista-tarjetas" class="tarjetas-grid"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tarjetas.js"></script>
+</body>
+</html>
