@@ -1,8 +1,8 @@
 <?php
 /*
- * Endpoint de métricas del inicio.
+ * Endpoint de métricas del inicio (solo lectura).
  * GET: muestra el resumen mensual (gastos, ingresos, economía, balance por cierre y categorías).
- * PUT: permite guardar el día de cierre de balance del usuario (día 1 al 28).
+ * El día de cierre se configura en configuracion.php: este endpoint solo lo lee.
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -74,31 +74,21 @@ function obtenerRangoBalance($anio, $mes, $diaCierre)
         responderError('No se pudo calcular el período de balance.', 500);
     }
 
-    $anterior = clone $actual;
-    $anterior->modify('-1 month');
+    // El período termina el día de cierre (inclusive) y arranca el día siguiente
+    // al cierre anterior. Antes ambos extremos usaban el mismo día y como BETWEEN
+    // es inclusivo, los movimientos del día de cierre se contaban en dos períodos.
+    $cierreAnterior = clone $actual;
+    $cierreAnterior->modify('-1 month');
+    $cierreAnterior->setDate((int) $cierreAnterior->format('Y'), (int) $cierreAnterior->format('m'), $diaCierre);
+    $cierreAnterior->modify('+1 day');
 
-    $inicio = sprintf('%04d-%02d-%02d', (int) $anterior->format('Y'), (int) $anterior->format('m'), $diaCierre);
+    $inicio = $cierreAnterior->format('Y-m-d');
     $fin = sprintf('%04d-%02d-%02d', (int) $actual->format('Y'), (int) $actual->format('m'), $diaCierre);
 
     return array($inicio, $fin);
 }
 
 try {
-    if ($metodo === 'PUT') {
-        $datos = obtenerBodyJson();
-        validarRequeridos($datos, array('dia_cierre_balance'));
-        $diaCierre = validarDiaCierre($datos['dia_cierre_balance']);
-
-        $sqlUpdate = 'UPDATE usuarios SET dia_cierre_balance = :dia_cierre_balance WHERE id = :id';
-        $stmtUpdate = $pdo->prepare($sqlUpdate);
-        $stmtUpdate->execute(array(
-            ':dia_cierre_balance' => $diaCierre,
-            ':id' => $usuarioId,
-        ));
-
-        responderExito('Día de cierre actualizado correctamente.', array('dia_cierre_balance' => $diaCierre));
-    }
-
     if ($metodo !== 'GET') {
         responderError('Método no permitido.', 405);
     }

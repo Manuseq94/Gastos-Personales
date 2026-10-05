@@ -1,57 +1,138 @@
 /*
   Este archivo maneja todo el CRUD de gastos en gastos.html.
-  Incluye cargar tarjetas, mostrar/ocultar selector de tarjeta,
-  guardar gastos, editar, eliminar y refrescar la tabla.
+  Reglas de la UI según método de pago:
+  - efectivo / billetera_virtual: solo monto.
+  - debito: monto + tarjeta de débito.
+  - credito: monto + tarjeta de crédito + cantidad de cuotas (valor de cuota calculado).
+  El cálculo de cuota acá es solo una vista previa: el backend recalcula y guarda el valor real.
 */
 
 var listadoGastos = [];
 var listadoTarjetas = [];
 
+var NOMBRES_METODO = {
+  efectivo: 'Efectivo',
+  debito: 'Débito',
+  credito: 'Crédito',
+  billetera_virtual: 'Billetera virtual'
+};
+
 /**
- * Devuelve la fecha de hoy en formato YYYY-MM-DD.
+ * Devuelve la fecha de hoy (hora LOCAL) en formato YYYY-MM-DD.
+ * toISOString() usa UTC: en Argentina, después de las 21 h devolvía el día siguiente.
  */
 function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
+  var hoy = new Date();
+  var mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  var dia = String(hoy.getDate()).padStart(2, '0');
+  return hoy.getFullYear() + '-' + mes + '-' + dia;
 }
 
 /**
- * Muestra u oculta el select de tarjeta según método de pago.
+ * Mismo cálculo que el backend (calcularPlanDePago): monto / cuotas redondeado a 2 decimales.
+ * Devuelve null si los datos todavía no son válidos.
  */
-function toggleTarjetaSegunMetodo() {
-  var metodo = document.getElementById('gasto-metodo').value;
-  var grupoTarjeta = document.getElementById('grupo-tarjeta');
-  var selectTarjeta = document.getElementById('gasto-tarjeta');
+function calcularValorCuota(monto, cuotas) {
+  if (!(monto > 0) || !Number.isInteger(cuotas) || cuotas < 1) {
+    return null;
+  }
+  return Math.round((monto / cuotas) * 100) / 100;
+}
 
-  if (metodo === 'debito' || metodo === 'credito') {
-    grupoTarjeta.classList.remove('oculto');
-    selectTarjeta.required = true;
+/**
+ * Actualiza la vista previa del valor de cuota.
+ */
+function actualizarValorCuota() {
+  var monto = Number(document.getElementById('gasto-monto').value);
+  var cuotas = Number(document.getElementById('gasto-cuotas').value);
+  var salida = document.getElementById('gasto-valor-cuota');
+  var valor = calcularValorCuota(monto, cuotas);
+
+  if (valor === null) {
+    salida.textContent = '-';
+    return;
+  }
+
+  salida.textContent = cuotas + ' x ' + formatearMoneda(valor);
+}
+
+/**
+ * Muestra u oculta tarjeta y cuotas según el método de pago elegido.
+ */
+function aplicarReglasMetodoPago() {
+  var metodo = document.getElementById('gasto-metodo').value;
+  var usaTarjeta = metodo === 'debito' || metodo === 'credito';
+  var esCredito = metodo === 'credito';
+
+  var selectTarjeta = document.getElementById('gasto-tarjeta');
+  var inputCuotas = document.getElementById('gasto-cuotas');
+
+  document.getElementById('grupo-tarjeta').classList.toggle('oculto', !usaTarjeta);
+  selectTarjeta.required = usaTarjeta;
+  if (usaTarjeta) {
     poblarSelectTarjetas(metodo);
   } else {
-    grupoTarjeta.classList.add('oculto');
-    selectTarjeta.required = false;
     selectTarjeta.value = '';
   }
+
+  document.getElementById('grupo-cuotas').classList.toggle('oculto', !esCredito);
+  document.getElementById('grupo-valor-cuota').classList.toggle('oculto', !esCredito);
+  inputCuotas.required = esCredito;
+  if (!esCredito) {
+    inputCuotas.value = 1;
+  }
+
+  actualizarValorCuota();
 }
 
 /**
- * Carga las opciones del select de tarjetas.
+ * Carga las opciones del select de tarjetas filtradas por tipo.
+ * Usa textContent para no interpretar como HTML datos cargados por el usuario.
  */
 function poblarSelectTarjetas(tipoRequerido) {
-  var tipo = tipoRequerido || null;
   var select = document.getElementById('gasto-tarjeta');
+  var seleccionPrevia = select.value;
 
   select.innerHTML = '<option value="">Seleccionar tarjeta</option>';
 
   listadoTarjetas.forEach(function (tarjeta) {
-    if (tipo && tarjeta.tipo !== tipo) {
+    if (tipoRequerido && tarjeta.tipo !== tipoRequerido) {
       return;
     }
 
     var option = document.createElement('option');
     option.value = tarjeta.id;
-    option.textContent = tarjeta.nombre + ' (' + tarjeta.tipo + ') - ' + tarjeta.banco + ' •••• ' + tarjeta.ultimos_4;
+    option.textContent = tarjeta.nombre + ' - ' + tarjeta.banco + ' •••• ' + tarjeta.ultimos_4;
     select.appendChild(option);
   });
+
+  // Si la tarjeta elegida sigue siendo válida para el nuevo filtro, la conservamos.
+  select.value = seleccionPrevia;
+  if (select.value !== seleccionPrevia) {
+    select.value = '';
+  }
+}
+
+/**
+ * Crea una celda con texto plano (evita XSS: nunca concatenar datos en innerHTML).
+ */
+function crearCelda(texto) {
+  var td = document.createElement('td');
+  td.textContent = texto;
+  return td;
+}
+
+/**
+ * Crea un botón de acción de la tabla.
+ */
+function crearBotonAccion(accion, id, texto, clase) {
+  var boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'btn btn-accion ' + clase;
+  boton.dataset.accion = accion;
+  boton.dataset.id = id;
+  boton.textContent = texto;
+  return boton;
 }
 
 /**
@@ -68,18 +149,24 @@ function renderTablaGastos() {
 
   listadoGastos.forEach(function (gasto) {
     var tr = document.createElement('tr');
-    tr.innerHTML = '' +
-      '<td>' + gasto.fecha + '</td>' +
-      '<td>' + gasto.descripcion + '</td>' +
-      '<td>' + gasto.categoria + '</td>' +
-      '<td>' + gasto.metodo_pago + '</td>' +
-      '<td>' + formatearMoneda(gasto.monto) + '</td>' +
-      '<td>' + gasto.cantidad_cuotas + ' x ' + formatearMoneda(gasto.valor_cuota) + '</td>' +
-      '<td>' + (gasto.tarjeta_nombre || '-') + '</td>' +
-      '<td>' +
-      '  <button class="btn btn-secundario btn-accion" data-accion="editar" data-id="' + gasto.id + '">Editar</button>' +
-      '  <button class="btn btn-eliminar btn-accion" data-accion="eliminar" data-id="' + gasto.id + '">Eliminar</button>' +
-      '</td>';
+
+    var textoCuotas = '-';
+    if (gasto.metodo_pago === 'credito') {
+      textoCuotas = gasto.cantidad_cuotas + ' x ' + formatearMoneda(gasto.valor_cuota);
+    }
+
+    tr.appendChild(crearCelda(gasto.fecha));
+    tr.appendChild(crearCelda(gasto.descripcion));
+    tr.appendChild(crearCelda(gasto.categoria));
+    tr.appendChild(crearCelda(NOMBRES_METODO[gasto.metodo_pago] || gasto.metodo_pago));
+    tr.appendChild(crearCelda(formatearMoneda(gasto.monto)));
+    tr.appendChild(crearCelda(textoCuotas));
+    tr.appendChild(crearCelda(gasto.tarjeta_nombre || '-'));
+
+    var tdAcciones = document.createElement('td');
+    tdAcciones.appendChild(crearBotonAccion('editar', gasto.id, 'Editar', 'btn-secundario'));
+    tdAcciones.appendChild(crearBotonAccion('eliminar', gasto.id, 'Eliminar', 'btn-eliminar'));
+    tr.appendChild(tdAcciones);
 
     tbody.appendChild(tr);
   });
@@ -91,8 +178,7 @@ function renderTablaGastos() {
 async function cargarTarjetas() {
   var respuesta = await apiRequest('tarjetas.php');
   listadoTarjetas = respuesta.datos.tarjetas || [];
-  poblarSelectTarjetas(null);
-  toggleTarjetaSegunMetodo();
+  aplicarReglasMetodoPago();
 }
 
 /**
@@ -112,21 +198,16 @@ async function cargarGastos() {
  * Deja el formulario listo para cargar un gasto nuevo.
  */
 function resetFormulario() {
+  document.getElementById('form-gasto').reset();
   document.getElementById('gasto-id').value = '';
-  document.getElementById('gasto-descripcion').value = '';
-  document.getElementById('gasto-monto').value = '';
   document.getElementById('gasto-fecha').value = hoyISO();
-  document.getElementById('gasto-categoria').value = '';
   document.getElementById('gasto-metodo').value = 'efectivo';
-  document.getElementById('gasto-tarjeta').value = '';
   document.getElementById('gasto-cuotas').value = 1;
-  document.getElementById('gasto-valor-cuota').value = 0;
-  document.getElementById('gasto-valor-total').value = 0;
 
   document.getElementById('titulo-form-gasto').textContent = 'Nuevo gasto';
   document.getElementById('btn-cancelar-gasto').classList.add('oculto');
 
-  toggleTarjetaSegunMetodo();
+  aplicarReglasMetodoPago();
 }
 
 /**
@@ -139,18 +220,10 @@ function cargarEnFormulario(gasto) {
   document.getElementById('gasto-fecha').value = gasto.fecha;
   document.getElementById('gasto-categoria').value = gasto.categoria;
   document.getElementById('gasto-metodo').value = gasto.metodo_pago;
+  document.getElementById('gasto-cuotas').value = gasto.cantidad_cuotas || 1;
 
-  toggleTarjetaSegunMetodo();
-
-  if (gasto.tarjeta_id) {
-    document.getElementById('gasto-tarjeta').value = gasto.tarjeta_id;
-  } else {
-    document.getElementById('gasto-tarjeta').value = '';
-  }
-
-  document.getElementById('gasto-cuotas').value = gasto.cantidad_cuotas;
-  document.getElementById('gasto-valor-cuota').value = gasto.valor_cuota;
-  document.getElementById('gasto-valor-total').value = gasto.valor_total;
+  aplicarReglasMetodoPago();
+  document.getElementById('gasto-tarjeta').value = gasto.tarjeta_id || '';
 
   document.getElementById('titulo-form-gasto').textContent = 'Editando gasto #' + gasto.id;
   document.getElementById('btn-cancelar-gasto').classList.remove('oculto');
@@ -182,21 +255,18 @@ function bindEventosTabla() {
     }
 
     var id = Number(boton.dataset.id);
-    var accion = boton.dataset.accion;
     var gasto = buscarGastoPorId(id);
-
     if (!gasto) {
       return;
     }
 
-    if (accion === 'editar') {
+    if (boton.dataset.accion === 'editar') {
       cargarEnFormulario(gasto);
       return;
     }
 
-    if (accion === 'eliminar') {
-      var confirmar = confirm('¿Seguro que querés eliminar este gasto?');
-      if (!confirmar) {
+    if (boton.dataset.accion === 'eliminar') {
+      if (!confirm('¿Seguro que querés eliminar este gasto?')) {
         return;
       }
 
@@ -213,19 +283,26 @@ function bindEventosTabla() {
 
 /**
  * Reúne los datos del formulario para enviarlos al servidor.
+ * Solo se envían cuotas cuando el método es crédito; valor_cuota y valor_total
+ * no se envían porque los calcula el backend.
  */
 function construirPayloadGasto() {
-  return {
+  var metodo = document.getElementById('gasto-metodo').value;
+
+  var payload = {
     descripcion: document.getElementById('gasto-descripcion').value.trim(),
     monto: Number(document.getElementById('gasto-monto').value),
     fecha: document.getElementById('gasto-fecha').value,
     categoria: document.getElementById('gasto-categoria').value.trim(),
-    metodo_pago: document.getElementById('gasto-metodo').value,
-    tarjeta_id: document.getElementById('gasto-tarjeta').value || null,
-    cantidad_cuotas: Number(document.getElementById('gasto-cuotas').value),
-    valor_cuota: Number(document.getElementById('gasto-valor-cuota').value),
-    valor_total: Number(document.getElementById('gasto-valor-total').value)
+    metodo_pago: metodo,
+    tarjeta_id: document.getElementById('gasto-tarjeta').value || null
   };
+
+  if (metodo === 'credito') {
+    payload.cantidad_cuotas = Number(document.getElementById('gasto-cuotas').value);
+  }
+
+  return payload;
 }
 
 /**
@@ -233,11 +310,10 @@ function construirPayloadGasto() {
  */
 function bindFormulario() {
   var form = document.getElementById('form-gasto');
-  var metodo = document.getElementById('gasto-metodo');
 
-  metodo.addEventListener('change', function () {
-    toggleTarjetaSegunMetodo();
-  });
+  document.getElementById('gasto-metodo').addEventListener('change', aplicarReglasMetodoPago);
+  document.getElementById('gasto-monto').addEventListener('input', actualizarValorCuota);
+  document.getElementById('gasto-cuotas').addEventListener('input', actualizarValorCuota);
 
   form.addEventListener('submit', async function (evento) {
     evento.preventDefault();
@@ -247,7 +323,7 @@ function bindFormulario() {
 
     try {
       if (id) {
-        await apiRequest('gastos.php?id=' + id, {
+        await apiRequest('gastos.php?id=' + encodeURIComponent(id), {
           method: 'PUT',
           body: JSON.stringify(payload)
         });
@@ -267,9 +343,7 @@ function bindFormulario() {
     }
   });
 
-  document.getElementById('btn-cancelar-gasto').addEventListener('click', function () {
-    resetFormulario();
-  });
+  document.getElementById('btn-cancelar-gasto').addEventListener('click', resetFormulario);
 }
 
 /**

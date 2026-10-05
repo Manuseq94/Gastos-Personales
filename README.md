@@ -10,7 +10,9 @@ Aplicación web fullstack para registrar y administrar gastos personales, ingres
 - Permite cargar, editar, listar y eliminar ingresos.
 - Permite cargar, editar, listar y eliminar tarjetas.
 - Si un gasto es con débito o crédito, podés asociarlo a una tarjeta.
+- Si un gasto es con crédito, se indica la cantidad de cuotas y el servidor calcula el valor de cuota.
 - Calcula métricas mensuales: gastos, ingresos, economía y balance por día de cierre.
+- El día de cierre se configura dentro de la app (pantalla de Inicio).
 
 ## Estructura de carpetas
 
@@ -34,7 +36,8 @@ gastos-personales-app/
 │       ├── gastos.php
 │       ├── ingresos.php
 │       ├── tarjetas.php
-│       └── metricas.php
+│       ├── metricas.php
+│       └── configuracion.php
 └── frontend/
     ├── index.html
     ├── dashboard.html
@@ -120,12 +123,11 @@ Base URL: `http://localhost/gastos-personales-app/backend/api`
 {
   "nombre": "Juan Pérez",
   "email": "juan@mail.com",
-  "password": "secreto123",
-  "dia_cierre_balance": 10
+  "password": "secreto123"
 }
 ```
 
-- `dia_cierre_balance` es opcional, toma `1` por defecto.
+- El usuario nuevo arranca con `dia_cierre_balance = 1`; se cambia luego con `PUT /configuracion.php`.
 - **Respuestas**:
   - `201` usuario creado + token
   - `409` email ya registrado
@@ -181,16 +183,17 @@ Base URL: `http://localhost/gastos-personales-app/backend/api`
   "monto": 25000,
   "fecha": "2026-10-19",
   "categoria": "Alimentos",
-  "metodo_pago": "debito",
+  "metodo_pago": "credito",
   "tarjeta_id": 2,
-  "cantidad_cuotas": 1,
-  "valor_cuota": 25000,
-  "valor_total": 25000
+  "cantidad_cuotas": 3
 }
 ```
 
 - `metodo_pago`: `efectivo | debito | credito | billetera_virtual`.
 - Si el método es `debito` o `credito`, `tarjeta_id` es obligatoria y debe coincidir el tipo.
+- `efectivo`, `billetera_virtual` y `debito`: solo monto (se guarda 1 cuota del monto total).
+- `credito`: `cantidad_cuotas` es obligatoria (entero de 1 a 60).
+- `valor_cuota` y `valor_total` los calcula el servidor (`monto / cantidad_cuotas`, sin interés); si se envían, se ignoran.
 - **Respuestas**:
   - `201` creado
   - `422` validación
@@ -203,7 +206,7 @@ Base URL: `http://localhost/gastos-personales-app/backend/api`
 - **Body JSON**: igual a POST.
 - **Respuestas**:
   - `200` actualizado
-  - `404` no encontrado o sin cambios
+  - `404` no encontrado
   - `422`, `401`, `405`, `500`
 
 ### `DELETE /gastos.php?id={id}`
@@ -351,11 +354,21 @@ Base URL: `http://localhost/gastos-personales-app/backend/api`
   - `dia_cierre=1..28`
 - Si no se ingresa `mes`, usa el mes actual.
 - Si no se ingresa `dia_cierre`, usa el guardado del usuario.
+- El período de balance va del día siguiente al cierre anterior hasta el día de cierre (inclusive).
 - **Respuestas**:
   - `200` con totales, categorías, economía y balance por cierre
   - `422`, `401`, `405`, `500`
 
-### `PUT /metricas.php`
+---
+
+### `GET /configuracion.php`
+
+- **Authorization**: `Bearer <token>`.
+- **Respuestas**:
+  - `200` con `dia_cierre_balance`
+  - `401`, `405`, `500`
+
+### `PUT /configuracion.php`
 
 - **Authorization**: `Bearer <token>`.
 - **Body JSON**:

@@ -336,6 +336,15 @@ td {
   margin-bottom: 0.4rem;
 }
 
+/* Valor calculado (ej: valor de cuota): se ve como campo, pero no es editable */
+output {
+  display: block;
+  border: 1px dashed var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font-weight: 400;
+}
+
 /* Clase utilitaria para ocultar elementos */
 .oculto {
   display: none;

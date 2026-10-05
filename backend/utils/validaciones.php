@@ -63,6 +63,9 @@ function validarFecha($fecha, $nombreCampo = 'fecha')
     }
 }
 
+// Valor inicial del día de cierre para usuarios nuevos (1 = mes calendario).
+const DIA_CIERRE_POR_DEFECTO = 1;
+
 /**
  * Valida el día de cierre de balance.
  */
@@ -90,6 +93,29 @@ function validarMetodoPago($metodo)
     if (!in_array($metodo, $permitidos, true)) {
         responderError('Método de pago inválido.', 422, array('permitidos' => $permitidos));
     }
+}
+
+/*
+ * Regla de negocio: el máximo de cuotas lo fijamos acá (único lugar)
+ * para que backend y mensajes de error queden alineados.
+ */
+const CUOTAS_MAXIMAS = 60;
+
+/**
+ * Valida la cantidad de cuotas de una compra con crédito.
+ * Rechaza valores no enteros ("3.5", "abc") en vez de truncarlos en silencio.
+ */
+function validarCantidadCuotas($cuotas)
+{
+    $valor = filter_var($cuotas, FILTER_VALIDATE_INT, array(
+        'options' => array('min_range' => 1, 'max_range' => CUOTAS_MAXIMAS),
+    ));
+
+    if ($valor === false) {
+        responderError('La cantidad de cuotas debe ser un número entero entre 1 y ' . CUOTAS_MAXIMAS . '.', 422);
+    }
+
+    return $valor;
 }
 
 /**

@@ -88,8 +88,8 @@ function inicializarRegistro() {
     var payload = {
       nombre: document.getElementById('registro-nombre').value.trim(),
       email: document.getElementById('registro-email').value.trim(),
-      password: document.getElementById('registro-password').value,
-      dia_cierre_balance: Number(document.getElementById('registro-cierre').value)
+      password: document.getElementById('registro-password').value
+      // El día de cierre se configura dentro de la app (Inicio > Configuración de balance).
     };
 
     try {

@@ -1,7 +1,7 @@
 /*
   Este archivo maneja la pantalla de inicio.
   Acá pedimos métricas al backend y actualizamos la UI.
-  También guardamos el día de cierre elegido por el usuario.
+  La configuración del día de cierre se lee y guarda en configuracion.php.
 */
 
 /**
@@ -34,7 +34,6 @@ async function cargarMetricas() {
     document.getElementById('total-ingresos').textContent = formatearMoneda(datos.total_ingresos_mes);
     document.getElementById('economia').textContent = formatearMoneda(datos.economia.valor) + ' (' + datos.economia.estado + ')';
     document.getElementById('balance-cierre').textContent = formatearMoneda(datos.balance_por_cierre);
-    document.getElementById('dia-cierre').value = datos.dia_cierre_balance;
 
     var listaCategorias = document.getElementById('lista-categorias');
     listaCategorias.innerHTML = '';
@@ -52,6 +51,18 @@ async function cargarMetricas() {
     mostrarMensaje('mensaje-metricas', 'Métricas cargadas del mes ' + mes + '.', 'exito');
   } catch (error) {
     mostrarMensaje('mensaje-metricas', error.message, 'error');
+  }
+}
+
+/**
+ * Trae la configuración guardada del usuario y la muestra en el formulario.
+ */
+async function cargarConfiguracion() {
+  try {
+    var resp = await apiRequest('configuracion.php');
+    document.getElementById('dia-cierre').value = resp.datos.dia_cierre_balance;
+  } catch (error) {
+    mostrarMensaje('mensaje-cierre', error.message, 'error');
   }
 }
 
@@ -76,7 +87,7 @@ function inicializarMetricas() {
     var dia = Number(document.getElementById('dia-cierre').value);
 
     try {
-      await apiRequest('metricas.php', {
+      await apiRequest('configuracion.php', {
         method: 'PUT',
         body: JSON.stringify({ dia_cierre_balance: dia })
       });
@@ -88,6 +99,7 @@ function inicializarMetricas() {
     }
   });
 
+  cargarConfiguracion();
   cargarMetricas();
 }
 

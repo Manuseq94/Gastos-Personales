@@ -30,11 +30,10 @@ validarRequeridos($datos, array('nombre', 'email', 'password'));
 $nombre = trim((string) $datos['nombre']);
 $email = strtolower(trim((string) $datos['email']));
 $password = (string) $datos['password'];
-$diaCierre = 1;
 
-if (isset($datos['dia_cierre_balance'])) {
-    $diaCierre = validarDiaCierre($datos['dia_cierre_balance']);
-}
+// El día de cierre ya no se pide al registrarse: arranca en el valor por defecto
+// y el usuario lo cambia desde la app (configuracion.php). Si llega en el body, se ignora.
+$diaCierre = DIA_CIERRE_POR_DEFECTO;
 
 if (mb_strlen($nombre) < 2) {
     responderError('El nombre debe tener al menos 2 caracteres.', 422);
