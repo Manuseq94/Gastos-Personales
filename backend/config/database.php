@@ -74,15 +74,31 @@ function env($clave, $default = null)
 }
 
 /**
+ * Devuelve los datos de conexión a MySQL.
+ * Primero usa DB_*; si no están, usa las variables MYSQL* que crea Railway.
+ */
+function obtenerConfigDb()
+{
+    return array(
+        'host' => env('DB_HOST', env('MYSQLHOST', '127.0.0.1')),
+        'port' => env('DB_PORT', env('MYSQLPORT', '3306')),
+        'name' => env('DB_NAME', env('MYSQLDATABASE', 'gastos_personales')),
+        'user' => env('DB_USER', env('MYSQLUSER', 'root')),
+        'pass' => env('DB_PASS', env('MYSQLPASSWORD', '')),
+    );
+}
+
+/**
  * Abre la conexión PDO a MySQL usando los datos de entorno.
  */
 function obtenerConexion()
 {
-    $host = env('DB_HOST', '127.0.0.1');
-    $port = env('DB_PORT', '3306');
-    $dbName = env('DB_NAME', 'gastos_personales');
-    $user = env('DB_USER', 'root');
-    $pass = env('DB_PASS', '');
+    $config = obtenerConfigDb();
+    $host = $config['host'];
+    $port = $config['port'];
+    $dbName = $config['name'];
+    $user = $config['user'];
+    $pass = $config['pass'];
 
     $dsn = 'mysql:host=' . $host . ';port=' . $port . ';dbname=' . $dbName . ';charset=utf8mb4';
 
@@ -95,6 +111,11 @@ function obtenerConexion()
             // Sin esto, guardar un registro sin cambios respondía 404 por error.
             PDO::MYSQL_ATTR_FOUND_ROWS => true,
         ));
+
+        // Alineamos la zona horaria de MySQL con la de PHP para que NOW()
+        // coincida con las fechas que arma PHP (por ejemplo, vencimiento de tokens).
+        $offset = (new DateTime('now'))->format('P');
+        $pdo->exec("SET time_zone = '" . $offset . "'");
 
         return $pdo;
     } catch (PDOException $e) {

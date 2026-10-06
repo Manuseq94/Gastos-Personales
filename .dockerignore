@@ -1,0 +1,12 @@
+.git
+.gitignore
+.vscode
+.idea
+README.md
+docker-compose.yml
+backend/.env
+backend/.env.local
+backend/.htaccess
+backend/vendor
+backend/composer.phar
+backend/database.sql

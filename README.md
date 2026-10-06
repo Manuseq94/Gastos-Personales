@@ -80,6 +80,27 @@ gastos-personales-app/
 5. **Abrí la aplicación**
    - Entrá a `frontend/index.html` desde tu servidor web.
 
+## Docker y deploy en Railway
+
+La imagen (PHP 8.3 + Apache) sirve `frontend/` y `backend/api/`. Al arrancar, `docker/init-db.php` espera a MySQL y crea las tablas de `docker/schema.sql` si no existen.
+
+**Local:** `docker compose up --build` y abrí `http://localhost:8080`.
+
+**Railway:**
+
+1. Creá un proyecto y agregá un servicio **MySQL**.
+2. Agregá un servicio desde este repo de GitHub (usa el `Dockerfile` vía `railway.json`).
+3. En las variables del servicio de la app cargá referencias al MySQL:
+   ```
+   DB_HOST=${{MySQL.MYSQLHOST}}
+   DB_PORT=${{MySQL.MYSQLPORT}}
+   DB_NAME=${{MySQL.MYSQLDATABASE}}
+   DB_USER=${{MySQL.MYSQLUSER}}
+   DB_PASS=${{MySQL.MYSQLPASSWORD}}
+   ```
+   Opcionales: `TOKEN_EXPIRATION_HOURS`, `CORS_ALLOW_ORIGIN`, `BREVO_*`, `TZ` (por defecto `America/Argentina/Buenos_Aires`).
+4. En **Settings → Networking** generá un dominio público. La raíz redirige a `/frontend/`.
+
 ## Variables de entorno (`backend/.env.example`)
 
 | Variable | Para qué sirve |
