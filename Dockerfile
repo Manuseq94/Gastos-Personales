@@ -32,7 +32,8 @@ COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 COPY docker/ ./docker/
 
-RUN sed -i 's/\r$//' docker/entrypoint.sh \
+RUN echo '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=frontend/"><a href="frontend/">Ir a la aplicación</a>' > index.html \
+    && sed -i 's/\r$//' docker/entrypoint.sh \
     && chmod +x docker/entrypoint.sh \
     && chown -R www-data:www-data /var/www/html
 

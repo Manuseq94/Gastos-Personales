@@ -10,7 +10,5 @@ php /var/www/html/docker/init-db.php || true
 rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf
 ln -s ../mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
 ln -s ../mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
-echo "[entrypoint] MPM cargados:"
-grep -rn "LoadModule mpm_" /etc/apache2 || true
 
 exec apache2-foreground
